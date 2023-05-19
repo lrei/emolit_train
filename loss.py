@@ -2,12 +2,10 @@
 
 from typing import Optional
 
-import torch
 from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import Trainer
-from torch.nn import MSELoss, SmoothL1Loss
 
 
 class SoftBCEWithLogitsLoss(nn.Module):
