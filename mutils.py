@@ -16,9 +16,6 @@ from sklearn.metrics import (
 from tqdm import tqdm
 
 
-from mbdataset import TestDatasetForMappedOutputEval
-
-
 def compute_metrics(eval_pred):
     """Compute metrics."""
     logits, labels = eval_pred
@@ -235,68 +232,6 @@ def write_run_metrics(
     with open(output_file, "a") as fout:
         print(json.dumps(metrics), file=fout)
     return metrics
-
-
-def perform_mapped_inference(
-    model, dataset: TestDatasetForMappedOutputEval, batch_size: int = 128,
-):
-    """Perform inference on a TestDatasetForMappedOutputEval with a given mapping.
-
-    Args:
-        model (torch.nn.Module): The model to use for inference.
-        dataset (torch.utils.data.Dataset): The dataset to perform inference on.
-        mapping (dict): The mapping from the original labels to the mapped labels.
-        multilabel (bool, optional): Whether the dataset is multilabel or not.
-        batch_size (int, optional): The batch size to use for inference.
-
-    Mapping Format
-    --------------
-    mapped_label_id -> [original_label_id_1, original_label_id_2, ...]
-
-    """
-    # Set the model to evaluation mode
-    model.eval()
-    device = next(model.parameters()).device
-    # collate_fn = DataCollatorWithPadding(tokenizer=tokenizer)
-
-    # get test properties
-    mapping = dataset.get_mapping()
-    multilabel = dataset.is_multilabel()
-
-    # Create an empty list to store the predictions
-    all_logits = []
-
-    # Loop through the dataset in batches
-    for i in tqdm(range(0, len(dataset), batch_size), dynamic_ncols=True):
-        inputs = dataset[i : i + batch_size]
-        # don't pass labels
-        inputs.pop("labels", None)
-        # send to same device as model
-        inputs = {k: v.to(device) for k, v in inputs.items()}
-
-        # Pass the inputs through the model
-        with torch.no_grad():
-            outputs = model(**inputs, return_dict=True)
-
-        # Extract the predicted labels from the output
-        logits = outputs.logits.detach().float().cpu()
-        all_logits.append(logits)
-    all_logits = torch.vstack(all_logits)
-
-    # map logits
-    mapped_logits = torch.zeros((all_logits.shape[0], len(mapping)))
-    for mapped_label_id, original_label_ids in mapping.items():
-        mapped_logits[:, mapped_label_id] = torch.max(
-            all_logits[:, original_label_ids], dim=1
-        )[0]
-
-    if multilabel:
-        # Handle multilabel
-        preds = (torch.sigmoid(mapped_logits) >= 0.5).float().numpy()
-        return preds
-    # Handle multiclass
-    preds = torch.argmax(mapped_logits, dim=1).numpy()
-    return preds
 
 
 def compute_metrics_with_logits_multilabel(eval_pred):

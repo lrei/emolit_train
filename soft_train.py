@@ -27,8 +27,8 @@ logging.basicConfig(
 TRAIN_FILE = "trn.tsv"
 VAL_FILE = "val.tsv"
 
-DATA_DIR = "./data/"
-TST_FILE = "./data/gold.tsv"
+DATA_DIR = "./data/emolit"
+TST_FILE = "./data/emolit/gold.tsv"
 output_dir = "./model"
 NUM_EPOCHS = 10
 BS = 16
@@ -37,7 +37,6 @@ LOAD_BEST = True
 
 SEQLEN = 64
 MODEL_NAME = "roberta-large"
-shutil.rmtree(output_dir, ignore_errors=True)
 os.makedirs(output_dir, exist_ok=True)
 
 
