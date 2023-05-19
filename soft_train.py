@@ -17,27 +17,29 @@ from mbdataset import MultiSoftTrainDataset, MLDatasetWithFloats
 from mutils import compute_metrics_soft, write_metrics
 from loss import SoftBCETrainer
 
+
+# Data
+TRAIN_FILE = "trn.tsv"
+VAL_FILE = "val.tsv"
+DATA_DIR = "./data/emolit"
+TST_FILE = "./data/emolit/gold.tsv"
+output_dir = "./model"
+
+# Params
+MODEL_NAME = "roberta-large"
+SEQLEN = 64
+BS = 16
+NUM_EPOCHS = 10
+LOAD_BEST = True
+os.makedirs(output_dir, exist_ok=True)
+
+# logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
     datefmt="%m/%d/%Y %H:%M:%S",
     level=logging.INFO,
 )
-
-TRAIN_FILE = "trn.tsv"
-VAL_FILE = "val.tsv"
-
-DATA_DIR = "./data/emolit"
-TST_FILE = "./data/emolit/gold.tsv"
-output_dir = "./model"
-NUM_EPOCHS = 10
-BS = 16
-LOAD_BEST = True
-
-
-SEQLEN = 64
-MODEL_NAME = "roberta-large"
-os.makedirs(output_dir, exist_ok=True)
 
 
 # Create the tokenizer
