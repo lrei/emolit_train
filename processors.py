@@ -4,12 +4,10 @@ import logging
 import dataclasses
 from dataclasses import dataclass
 from collections import Counter
-from typing import List, Optional, Dict, Union
+from typing import List, Optional, Dict
 
 import pandas as pd
 from transformers import DataProcessor  # type: ignore
-from sklearn.preprocessing import MultiLabelBinarizer
-from iterstrat.ml_stratifiers import MultilabelStratifiedShuffleSplit
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +64,6 @@ class MultiLabelTSVProcessor(DataProcessor):
         ignore_cols: List[string]. A list of columns to ignore.
         index_col: string. The column of the file containing the id strings.
             If None, uses the row as index.
-        limit: float. The fraction of the data to use.
         random_state: int. The random state to use for the split.
     """
 
@@ -79,7 +76,6 @@ class MultiLabelTSVProcessor(DataProcessor):
         index_col: str = "tid",
         split_col: Optional[str] = None,
         use_cols: Optional[List[str]] = None,
-        limit: Optional[Union[float, int]] = None,
         random_state: int = 1984,
     ):
         """See class."""
@@ -89,7 +85,6 @@ class MultiLabelTSVProcessor(DataProcessor):
         self.split_col = split_col
         self.use_cols = use_cols
         self.index_col = index_col
-        self.limit = limit
         self.random_state = random_state
 
         if self.use_cols and self.split_col:
@@ -99,26 +94,6 @@ class MultiLabelTSVProcessor(DataProcessor):
                 self.text_col,
             ] + self.use_cols
             self.use_cols = [self.index_col, self.text_col] + self.use_cols
-
-    def _limit_df(self, df):
-        """Limit the dataframe to a fraction of the data."""
-        if self.limit is None:
-            return df
-        if self.limit <= 0:
-            return df
-        X = [i for i in range(len(df))]
-        msss = MultilabelStratifiedShuffleSplit(
-            n_splits=1, test_size=self.limit, random_state=self.random_state
-        )
-        label_list = self._get_labels_in_data(df)
-        y = df[label_list].to_dict("records")
-        y = [[k for k, v in d.items() if v == 1] for d in y]
-        mlb = MultiLabelBinarizer()
-        y = mlb.fit_transform(y)
-        for _, train_index in msss.split(X, y):
-            df = df.iloc[train_index]
-            logger.info(f"Limiting data to {len(df)} rows")
-            return df
 
     def _df_has_neutral(self, df):
         """Check that the dataframe has a neutral examples."""
@@ -156,8 +131,6 @@ class MultiLabelTSVProcessor(DataProcessor):
         )  # type: ignore
         cols = df.columns.tolist()  # type: ignore
         cols = [c for c in cols if c not in [self.text_col, self.index_col]]
-        if self.limit:
-            df = self._limit_df(df)
 
         ids = df.index.tolist()  # type: ignore
 
