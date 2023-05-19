@@ -27,7 +27,7 @@ output_dir = "./model"
 
 # Params
 MODEL_NAME = "roberta-large"
-SEQLEN = 64
+SEQLEN = 48
 BS = 16
 NUM_EPOCHS = 10
 LOAD_BEST = True
