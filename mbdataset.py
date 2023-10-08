@@ -56,8 +56,12 @@ class MLDatasetWithFloats(Dataset):
         # go through examples and create statistics for sequence length
         token_lengths = []
         for ex in examples:
-            tokens = self.tokenizer(ex.text)["input_ids"]
-            token_lengths.append(len(tokens))
+            try:
+                tokens = self.tokenizer(ex.text)["input_ids"]
+                token_lengths.append(len(tokens))
+            except:
+                logger.error(f"Error with example: {ex}")
+                continue
         # calculate average, max, and percentiles
         quartiles = np.percentile(token_lengths, [50, 97, 99])
         max_len = max(token_lengths)

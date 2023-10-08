@@ -161,7 +161,6 @@ class MultiLabelTSVProcessor(DataProcessor):
             if not count_labels:
                 count_labels = ["neutral"]
             counter.update(count_labels)
-            counter["n_examples"] += 1
 
             split = row[self.split_col] if self.split_col else None
 
