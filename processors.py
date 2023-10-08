@@ -126,10 +126,11 @@ class MultiLabelTSVProcessor(DataProcessor):
             sep="\t",  # type: ignore
         )  # type: ignore
         cols = df.columns.tolist()  # type: ignore
-        cols = [c for c in cols if c not in [self.text_col, self.index_col]]
+        cols = [c for c in cols if c not in self.not_labels]
 
         # filter by language
         if self.lang is not None:
+            logger.info(f"Filtering by language: {self.lang}")
             df = df[df[self.lang_col] == self.lang]
 
 
