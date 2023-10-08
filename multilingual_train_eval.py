@@ -89,7 +89,6 @@ trainer = Trainer(
     eval_dataset=ds_gold,
     data_collator=collator_fn,
     compute_metrics=compute_metrics,
-    label_smoothing_factor=None,
 )
 trainer.train()
 trainer.save_model(output_dir)
