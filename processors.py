@@ -118,7 +118,7 @@ class MultiLabelTSVProcessor(DataProcessor):
     def _read_tsv(self) -> List[MBExample]:
         """Read data file."""
         logger.info(
-            f"Reading from file={self.data_file} index_col={self.index_col}"
+            f"Reading from file={self.data_file}"
         )
         counter = Counter()
         df = pd.read_csv(
