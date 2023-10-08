@@ -78,6 +78,7 @@ class MultiLabelTSVProcessor(DataProcessor):
         split: Optional[str] = None,
         split_col: Optional[str] = None,
         random_state: int = 1984,
+        print_counts: bool = False,
     ):
         """See class."""
         super(MultiLabelTSVProcessor, self).__init__()
@@ -90,6 +91,8 @@ class MultiLabelTSVProcessor(DataProcessor):
 
         self.split_col = split_col
         self.split = split
+
+        self.print_counts = print_counts
 
         self.not_labels = [self.text_col, self.lang_col, self.split_col]
         self.not_labels = [c for c in self.not_labels if c is not None]
@@ -179,8 +182,9 @@ class MultiLabelTSVProcessor(DataProcessor):
             examples.append(ex)
 
         logger.info(f"Read: {len(examples)} examples")
-        for k in sorted(counter.keys()):
-            logger.info(f"\t{k}:\t{counter[k]}")
+        if self.print_counts:
+            for k in sorted(counter.keys()):
+                logger.info(f"\t{k}:\t{counter[k]}")
         return examples
 
     def get_examples(self) -> List[MBExample]:

@@ -12,7 +12,7 @@ from transformers import (
     DataCollatorWithPadding,
 )
 from processors import MultiLabelTSVProcessor
-from mbdataset import MLDataset
+from mbdataset import MLDatasetWithFloats
 from mutils import compute_metrics
 
 TRN_SRC = "/data/exp/emotions_translation/emolit.tsv"
@@ -64,11 +64,11 @@ collator_fn = DataCollatorWithPadding(
 
 # load train dataset
 proc_trn = MultiLabelTSVProcessor(TRN_SRC)
-ds_trn = MLDataset(proc_trn, tkz, max_seq_length=SEQLEN)
+ds_trn = MLDatasetWithFloats(proc_trn, tkz, max_seq_length=SEQLEN)
 
 # load eval dataset
 proc_gold = MultiLabelTSVProcessor(GOLD_SRC)
-ds_gold = MLDataset(proc_gold, tkz, max_seq_length=SEQLEN, le=ds_trn.get_label_encoder())
+ds_gold = MLDatasetWithFloats(proc_gold, tkz, max_seq_length=SEQLEN, le=ds_trn.get_label_encoder())
 
 logger.info(f"Train: {len(ds_trn)} examples")
 logger.info(f"Gold: {len(ds_gold)} examples")
@@ -110,7 +110,7 @@ for lang in langs:
     # create a processor for this language
     proc_lang = MultiLabelTSVProcessor(GOLD_SRC, lang=lang)
     # create a dataset for this language
-    ds_lang = MLDataset(proc_lang, tkz, max_seq_length=SEQLEN, le=ds_trn.get_label_encoder())
+    ds_lang = MLDatasetWithFloats(proc_lang, tkz, max_seq_length=SEQLEN, le=ds_trn.get_label_encoder())
     # evaluate
     res = trainer.evaluate(ds_lang)
     print(res)
