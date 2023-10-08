@@ -63,7 +63,7 @@ class MLDatasetWithFloats(Dataset):
             except:
                 logger.error(f"Error with example: {ex}")
                 continue
-        """
+        
         # calculate average, max, and percentiles
         quartiles = np.percentile(token_lengths, [50, 97, 99])
         max_len = max(token_lengths)
@@ -71,6 +71,7 @@ class MLDatasetWithFloats(Dataset):
         print("97: %.3f" % quartiles[1])
         print("99: %.3f" % quartiles[2])
         print("Max: %.3f" % max_len)
+        """
 
         self._index_labels(examples, le)
         self.examples = examples
