@@ -73,27 +73,27 @@ class MultiLabelTSVProcessor(DataProcessor):
         self,
         data_file,
         text_col: str = "text",
-        index_col: str = "tid",
+        lang: Optional[str] = None,
+        lang_col: str = "lang",
+        split: Optional[str] = None,
         split_col: Optional[str] = None,
-        use_cols: Optional[List[str]] = None,
         random_state: int = 1984,
     ):
         """See class."""
         super(MultiLabelTSVProcessor, self).__init__()
         self.data_file = data_file
         self.text_col = text_col
-        self.split_col = split_col
-        self.use_cols = use_cols
-        self.index_col = index_col
         self.random_state = random_state
 
-        if self.use_cols and self.split_col:
-            self.use_cols = [
-                self.index_col,
-                self.split_col,
-                self.text_col,
-            ] + self.use_cols
-            self.use_cols = [self.index_col, self.text_col] + self.use_cols
+        self.lang = lang
+        self.lang_col = lang_col
+
+        self.split_col = split_col
+        self.split = split
+
+        self.not_labels = [self.text_col, self.lang_col, self.split_col]
+        self.not_labels = [c for c in self.not_labels if c is not None]
+        self.not_labels += ["tid", "id", "split", "og_split", "text", "lang"]
 
     def _df_has_neutral(self, df):
         """Check that the dataframe has a neutral examples."""
@@ -111,26 +111,27 @@ class MultiLabelTSVProcessor(DataProcessor):
         label_list = [
             lbl
             for lbl in label_list
-            if lbl != self.text_col
-            and lbl != self.index_col
-            and lbl != self.split_col
+            if lbl not in self.not_labels
         ]
         return label_list
 
     def _read_tsv(self) -> List[MBExample]:
         """Read data file."""
         logger.info(
-            f"Reading from file={self.data_file} index_col={self.index_col} use_cols={self.use_cols}"
+            f"Reading from file={self.data_file} index_col={self.index_col}"
         )
         counter = Counter()
         df = pd.read_csv(
             self.data_file,
             sep="\t",  # type: ignore
-            index_col=self.index_col,
-            usecols=self.use_cols,
         )  # type: ignore
         cols = df.columns.tolist()  # type: ignore
         cols = [c for c in cols if c not in [self.text_col, self.index_col]]
+
+        # filter by language
+        if self.lang is not None:
+            df = df[df[self.lang_col] == self.lang]
+
 
         ids = df.index.tolist()  # type: ignore
 
@@ -150,8 +151,8 @@ class MultiLabelTSVProcessor(DataProcessor):
             if guid is None:
                 raise ValueError("No found")
             guid = str(guid)
-            keys = [k for k in row.keys() if k != self.text_col]
-            labels = [k for k in keys if row[k] == 1]
+            keys = [k for k in row.keys() if k not in self.not_labels]
+            labels: List[str] = [str(k) for k in keys if row[k] == 1]
 
             # count labels
             count_labels = [k for k in labels]
@@ -177,7 +178,9 @@ class MultiLabelTSVProcessor(DataProcessor):
             # add it to the list
             examples.append(ex)
 
-        logger.info(f"Read: {counter}")
+        logger.info(f"Read: {len(examples)} examples")
+        for k in sorted(counter.keys()):
+            logger.info(f"\t{k}:\t{counter[k]}")
         return examples
 
     def get_examples(self) -> List[MBExample]:

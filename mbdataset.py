@@ -53,6 +53,19 @@ class MLDatasetWithFloats(Dataset):
         examples = processor.get_examples()
         logger.info(f"Total Read: {len(examples)}")
 
+        # go through examples and create statistics for sequence length
+        token_lengths = []
+        for ex in examples:
+            tokens = self.tokenizer(ex.text)["input_ids"]
+            token_lengths.append(len(tokens))
+        # calculate average, max, and percentiles
+        quartiles = np.percentile(token_lengths, [50, 97, 99])
+        max_len = max(token_lengths)
+        print("Median: %.3f" % quartiles[0])
+        print("97: %.3f" % quartiles[1])
+        print("99: %.3f" % quartiles[2])
+        print("Max: %.3f" % max_len)
+
         self._index_labels(examples, le)
         self.examples = examples
         self.features = self._featurize(examples)
@@ -428,3 +441,46 @@ class MultiSoftTrainDataset(Dataset):
     def get_label_encoder(self) -> MultiLabelBinarizer:
         """Return the label encoder."""
         return self.mlb
+
+
+class MLDataset(MLDatasetWithFloats):
+    """Multilabel Dataset."""
+
+    id2label: Dict[int, str]
+    label2id: Dict[str, int]
+    num_labels: int
+    mlb: MultiLabelBinarizer
+    label_names: List[str]
+
+    
+    def _featurize_one(self, ex: MBExample):
+        raise NotImplementedError("Not implemented")
+
+    def _featurize(self, exs: List[MBExample]):
+        # tokenize
+        features = self.tokenizer(
+            text=[ex.text for ex in exs],
+            padding=True,
+            truncation=True,
+            return_tensors="pt",
+            max_length=self.max_seq_length,
+        )
+
+        # create labels tensor
+        labels = torch.LongTensor(self.mlb.transform([ex.labels for ex in exs]))
+        features["labels"] = labels
+
+        return features
+
+    def __len__(self):
+        """Length of dataset corresponds to the number of examples."""
+        return len(self.examples)
+
+    def __getitem__(self, i):
+        """Return the i-th example's features."""
+        item = {k: self.features[k][i] for k in self.features.keys()}  # type: ignore
+
+        return item
+
+    def get_label_list(self) -> Union[List[List[str]], List[str]]:
+        raise NotImplementedError("Not implemented")
