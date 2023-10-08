@@ -474,7 +474,7 @@ class MLDataset(MLDatasetWithFloats):
         )
 
         # create labels tensor
-        labels = torch.LongTensor(self.mlb.transform([ex.labels for ex in exs]))
+        labels = torch.FloatTensor(self.mlb.transform([ex.labels for ex in exs]))
         features["labels"] = labels
 
         return features
