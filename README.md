@@ -2,6 +2,7 @@
 
 ## Instructions
 Extract the data into the `data` dir so it looks like this: `data/emolit`.
+Or for the multilingual data: `data/emolit_multilingual`
 
 Install the requirements in `requirements.txt` (consider virtualenv).
 
@@ -9,6 +10,7 @@ Change any parameters in the `soft_train.py` file (e.g. encoder model, batch
 size, number of epochs, ...).
 
 Run: `python soft_train.py`. This should train a model and save it to the `model` directory.
+Run: `python multilingual_train_eval.py`. This should train a model and save it to the `model/multilingual` directory.
 
 ## Description
 Literature sentences from [Project Gutenberg](https://www.gutenberg.org/). 38 emotion labels (+neutral examples). Semi-Supervised dataset. 
@@ -77,6 +79,7 @@ Emotion detection in text is a fundamental aspect of affective computing and is 
 
 ## Dataset
 [EmoLit (Zenodo)](https://zenodo.org/record/7883954)
+[EmoLit Translated (Zenodo)](https://zenodo.org/record/8420877)
 
 ## Code
 [EmoLit Train (Github)](https://github.com/lrei/emolit_train)
@@ -85,4 +88,5 @@ Emotion detection in text is a fundamental aspect of affective computing and is 
   - [LARGE](https://huggingface.co/lrei/roberta-large-emolit) 
   - [BASE](https://huggingface.co/lrei/roberta-base-emolit) 
   - [DISTILL](https://huggingface.co/lrei/distilroberta-base-emolit)
+  - [Multilingual](https://huggingface.co/lrei/xlm-roberta-base-emolit-multilingual): en, nl, fr, it
 
