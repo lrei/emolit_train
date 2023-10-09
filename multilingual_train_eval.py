@@ -15,9 +15,9 @@ from processors import MultiLabelTSVProcessor
 from mbdataset import MLDatasetWithFloats
 from mutils import compute_metrics
 
-TRN_SRC = "/data/exp/emotions_translation/emolit.tsv"
-GOLD_SRC = "/data/exp/emotions_translation/gold.tsv"
-output_dir = "/data/exp/emotions/multilingual"
+TRN_SRC = "./data/emolit_multilingual/emolit.tsv"
+GOLD_SRC = "/data/emolit_multilingual/gold.tsv"
+output_dir = "./model/multilingual"
 MODEL_NAME = "xlm-roberta-base"
 SEQLEN = 64
 BS=32
